@@ -28,8 +28,8 @@ $(function() {
          */
 		it('urls are not null', function() {
 			for(var i=0;i<allFeeds.length;i++ ){
-				console.log(allFeeds[i].url);
-				expect(allFeeds[i].url).not.toBe(null);
+				console.log(allFeeds[i].url.length);
+				expect(allFeeds[i].url.length).not.toBe(0);
 			}
 		});
 
@@ -38,8 +38,8 @@ $(function() {
          */
 		it('names are not null', function() {
 			for(var i=0;i<allFeeds.length;i++ ){
-				console.log(allFeeds[i].name);
-				expect(allFeeds[i].name).not.toBe(null);
+				console.log(allFeeds[i].name.length);
+				expect(allFeeds[i].name.length).not.toBe(0);
 			}
 		});
     });
@@ -54,20 +54,7 @@ $(function() {
 		
 		it('menu-hidden by default',function() {
 			
-			if(0 === varOnload){
-				var tag1 = document.getElementsByClassName('menu-hidden');
-				//expect(tag1[0]).not.toBe(null);	
-				if(tag1[0] === undefined){
-					varOnload = 1;//fail
-				}
-				else
-				{
-					varOnload = 2;
-				}
-				
-			}
-
-			expect(varOnload).toBe(2);
+			expect($('body').hasClass('menu-hidden')).toBeTruthy();
 				
 		});
 		
@@ -94,17 +81,15 @@ $(function() {
          * 和异步的 done() 函数。
          */
 		beforeEach(function(done){
-			for(var i=0; i<allFeeds.length; i++){
-				loadFeed(i ,function(){
-					done();
-				});
-			}
+			//for(var i=0; i<allFeeds.length; i++){
+				loadFeed(1 ,done);
+			//}
 		});
 		
 		it('.feed should have at least 1 .entry element',function(done){
 			expect($('.feed').find('.entry')).toBeDefined();
 			console.log($('.feed').find('.entry'));
-			done();
+			done();//这个不能去掉
 		}); 
 	});
     /* TODO: 写一个叫做 "New Feed Selection" 的测试用例 */
@@ -113,69 +98,59 @@ $(function() {
          * 写一个测试保证当用 loadFeed 函数加载一个新源的时候内容会真的改变。
          * 记住，loadFeed() 函数是异步的。
          */
-/*		 var content=[],content2=0;
-		 beforeEach(function(done){
-			 
-			 for(var i=0; i<allFeeds.length; i++){
-				loadFeed(i , done);
-				 //console.log($('.feed'));
-			 }
-			
-			done();
-			//loadFeed(2 , done);
-			//content2 = $('.feed').children('.entry-link');//[0].children('.entry')[0];
-		});
-		
-		it('new feed should be different from last one', function(done){
-			//content2 = $('.feed');
-			//expect(content2).not.toBe(content);
-			content = $('.feed').children('.entry');//.children('a')[0].children('article')[0];//[0].children('.entry')[0];
-			console.log(content);
-			expect(content2).not.toBe(content);
-			done();
-		});
-		 */ 
+		var originalTimeout;
 		 var content = [];//,content1;
 		  beforeEach(function(done) {// （必要条件二）测试异步调用时 done 是jasmine内置的函数，测试异步调用时该参数必传
-			  
-			  loadFeed(0, function(){
-				content[0] = $('.feed').html();
-				console.log(content[0]);
-				//done();
-			  });
-			  loadFeed(1, function(){
+			
+			content[0] = $('.feed').html();
+			
+			originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL; 
+			jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
+			loadFeed(0, function(){
 				content[1] = $('.feed').html();
-				console.log(content[1]);
-				//done();
-			  });
-			  
-			  loadFeed(2, function(){
-				content[2] = $('.feed').html();
-				console.log(content[2]);
-				//done();
-			  });
-			  
-			  //for(var i = allFeeds.length -1; i >=0; i-- ) {
-				loadFeed(3, function(){
-					content[3] = $('.feed').html();
-					console.log(content[3]);
+				//console.log(content[0]);
+				done();
+				/*loadFeed(1, function(){
+					content[1] = $('.feed').html();
+					//console.log(content[1]);
 					done();
-				});// （必要条件三）异步函数loadFeed在请求成功的回调函数里调用done函数
-			  //}        
+					loadFeed(2, function(){
+						content[2] = $('.feed').html();
+						//console.log(content[2]);
+						
+						loadFeed(3, function(){
+							content[3] = $('.feed').html();
+							//console.log(content[3]);
+						//再多一个loadFeed  就会导致 async timeout....不过比较3个内容应该已经够了?
+						//有时候可以loadfeed 3次都可以 
+						//现在只能保证一次loadfeed async timeout，跟链接被墙有关系么？然而已经翻墙了。蛋疼。看论坛里也有人遇到这种情况。
+							done();
+						
+							 
+						});// （必要条件三）异步函数loadFeed在请求成功的回调函数里调用done函数						
+					});	
+				});*/
+			});
+      
 		  });
         /* 
         * 写一个测试保证当用 loadFeed 函数加载一个新源的时候内容会真的改变。
         * 记住，loadFeed() 函数是异步的。
         */
         it('content in container with class feed should be changed when function loadFeed works',function(done) {
-            var j=0;
-			for(var i = allFeeds.length -1; i >=0; i-- ) {
-				j = i-1;
-				if(i = 0)
-					j = 3;
-				expect(content[i]).not.toBe(content[j]);
-			}
+            //var j=0;
+			//for(var i = 0;i < (allFeeds.length-1) ; i++ ) {
+			//	j = i+1;
+			//	if(i = 2)
+			//		j = 0;
+				expect(content[0]).not.toBe(content[1]);
+				
+			//}
             done(); // （必要条件四）此处必须调用该函数
         }); 
+		
+		afterEach(function() {
+			jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
+		});
 	});
 }());
